@@ -10,20 +10,27 @@ pinMode(clockPin, OUTPUT);
 pinMode(dataPin, OUTPUT);
 
 digitalWrite(latchPin, LOW); // устанавливаем синхронизацию "защелки" на LOW
-shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000); // передаем последовательно на dataPin
-shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
-shiftOut(dataPin, clockPin, LSBFIRST, 0b11111111);
+shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000); // передаем последовательно на dataPin
+shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
 digitalWrite(latchPin, HIGH); //"защелкиваем" регистр, тем самым устанавливая значения на выходах
 }
 
 void loop()
 {
-  switch (1) {
+  switch (4) {
   case 1:
     onDisplayFirstProgram();
     break;
   case 2:
     onDisplayTwoProgram();
+    break;
+   case 3:
+    onDisplayThreeProgram();
+    break;
+   case 4:
+    onDisplayFourProgram();
+    break;
   }
 }
 
@@ -33,32 +40,128 @@ void onDisplayTwoProgram()
   byte registerData2 = B01000100;
   byte registerData3 = B00000100;
   digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
   digitalWrite(latchPin, HIGH);
   
-  delay(50);
+  delay(500);
   
   registerData1 = B01010101;
   registerData2 = B10101010;
   registerData3 = B00001010;
   digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
   digitalWrite(latchPin, HIGH);
   
-  delay(50);
+  delay(500);
   
   registerData1 = B10001000;
   registerData2 = B00010001;
   registerData3 = B00010000;
   digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
   digitalWrite(latchPin, HIGH);
+
+  delay(500);
+}
+
+void onDisplayThreeProgram()
+{
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  digitalWrite(latchPin, HIGH);
+  delay(500);
+  
+  byte registerData1 = B00100010;
+  byte registerData2 = B01000100;
+  byte registerData3 = B00000100;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+  
+  delay(500);
+  
+  registerData1 = registerData1 | B01010101;
+  registerData2 = registerData2 | B10101010;
+  registerData3 = registerData3 | B00001010;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+  
+  delay(500);
+  
+  registerData1 = registerData1 | B10001000;
+  registerData2 = registerData2 | B00010001;
+  registerData3 = registerData3 | B00010000;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+
+  delay(500);
+}
+
+void onDisplayFourProgram()
+{
+
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
+  digitalWrite(latchPin, HIGH);
+  delay(500);
+
+  byte registersData[3]= {
+    B10001000,
+    B00010001,
+    B00010000
+  };
+  
+  byte registerData1 = B10001000;
+  byte registerData2 = B00010001;
+  byte registerData3 = B00010000;
+  digitalWrite(latchPin, LOW);
+ 
+  shiftOut(dataPin, clockPin, MSBFIRST, registersData[2]);
+  shiftOut(dataPin, clockPin, MSBFIRST, registersData[1]);
+  shiftOut(dataPin, clockPin, MSBFIRST, registersData[0]);
+  digitalWrite(latchPin, HIGH);
+
+  delay(500);
+
+  registerData1 = registerData1 | B01010101;
+  registerData2 = registerData2 | B10101010;
+  registerData3 = registerData3 | B00001010;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+  
+  delay(500);
+  
+  registerData1 = registerData1| B00100010;
+  registerData2 = registerData2 | B01000100;
+  registerData3 = registerData3 | B00000100;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+  
+  delay(500);
 }
 
 /* Эта функция сдвигает биты влево на одну позицию, перемещая старший бит
