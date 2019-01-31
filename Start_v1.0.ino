@@ -1,174 +1,89 @@
-int latchPin = 10;
-int clockPin = 11;
-int dataPin = 9;
+int dataPin = 9; //Пин подключен к DS входу 74HC595
+int latchPin = 10; //Пин подключен к ST_CP входу 74HC595
+int clockPin = 11; //Пин подключен к SH_CP входу 74HC595
 
-int numOfRegisters = 3;
-byte* registerState;
+void setup()
+{
+//устанавливаем режим OUTPUT
+pinMode(latchPin, OUTPUT);
+pinMode(clockPin, OUTPUT);
+pinMode(dataPin, OUTPUT);
 
-long effectId = 0;
-long prevEffect = 0;
-long effectRepeat = 0;
-long effectSpeed = 30;
-
-void setup() {
-  //Initialize array
-  registerState = new byte[numOfRegisters];
-  for (size_t i = 0; i < numOfRegisters; i++) {
-    registerState[i] = 0;
-  }
-
-  //set pins to output so you can control the shift register
-  pinMode(latchPin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
-  pinMode(dataPin, OUTPUT);
+digitalWrite(latchPin, LOW); // устанавливаем синхронизацию "защелки" на LOW
+shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000); // передаем последовательно на dataPin
+shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
+shiftOut(dataPin, clockPin, LSBFIRST, 0b11111111);
+digitalWrite(latchPin, HIGH); //"защелкиваем" регистр, тем самым устанавливая значения на выходах
 }
 
-void loop() {
-  do{
-    effectId = random(6);
-  } while (effectId == prevEffect);
-  prevEffect = effectId;
-
-  switch (effectId)
-  {
-  case 0:
-    effectRepeat = random(1, 2);
-    break;
+void loop()
+{
+  switch (1) {
   case 1:
-    effectRepeat = random(1, 2);
+    onDisplayFirstProgram();
     break;
-  case 3:
-    effectRepeat = random(1, 5);
-    break;
-  case 4:
-    effectRepeat = random(1, 2);
-    break;
-  case 5:
-    effectRepeat = random(1, 2);
-    break;
-  }
-
-  for (int i = 0; i < effectRepeat; i++) {
-    effectSpeed = random(10, 90);
-
-    switch (effectId)
-    {
-    case 0:
-      effectA(effectSpeed);
-      break;
-    case 1:
-      effectB(effectSpeed);
-      break;
-    case 3:
-      effectC(effectSpeed);
-      break;
-    case 4:
-      effectD(effectSpeed);
-      break;
-    case 6:
-      effectE(effectSpeed);
-      break;
-    }
+  case 2:
+    onDisplayTwoProgram();
   }
 }
 
-void effectA(int speed){
-  for (int i = 0; i < 16; i++){
-    for (int k = i; k < 16; k++){
-      regWrite(k, HIGH);
-      delay(speed);
-      regWrite(k, LOW);
-    }
-
-    regWrite(i, HIGH);
-  }
-}
-
-void effectB(int speed){
-  for (int i = 15; i >= 0; i--){
-    for (int k = 0; k < i; k++){
-      regWrite(k, HIGH);
-      delay(speed);
-      regWrite(k, LOW);
-    }
-
-    regWrite(i, HIGH);
-  }
-}
-
-void effectC(int speed){
-  int prevI = 0;
-  for (int i = 0; i < 16; i++){
-    regWrite(prevI, LOW);
-    regWrite(i, HIGH);
-    prevI = i;
-
-    delay(speed);
-  }
-
-  for (int i = 15; i >= 0; i--){
-    regWrite(prevI, LOW);
-    regWrite(i, HIGH);
-    prevI = i;
-
-    delay(speed);
-  }
-}
-
-void effectD(int speed){
-  for (int i = 0; i < 8; i++){
-    for (int k = i; k < 8; k++)
-    {
-      regWrite(k, HIGH);
-      regWrite(15 - k, HIGH);
-      delay(speed);
-      regWrite(k, LOW);
-      regWrite(15 - k, LOW);
-    }
-
-    regWrite(i, HIGH);
-    regWrite(15 - i, HIGH);
-  }
-}
-
-void effectE(int speed){
-  for (int i = 7; i >= 0; i--){
-    for (int k = 0; k <= i; k++)
-    {
-      regWrite(k, HIGH);
-      regWrite(15 - k, HIGH);
-      delay(speed);
-      regWrite(k, LOW);
-      regWrite(15 - k, LOW);
-    }
-
-    regWrite(i, HIGH);
-    regWrite(15 - i, HIGH);
-  }
-}
-
-void regWrite(int pin, bool state){
-  //Determines register
-  int reg = pin / 8;
-  //Determines pin for actual register
-  int actualPin = pin - (8 * reg);
-
-  //Begin session
-  digitalWrite(latchPin, LOW);
-
-  for (int i = 0; i < numOfRegisters; i++){
-    //Get actual states for register
-    byte* states = &registerState[i];
-
-    //Update state
-    if (i == reg){
-      bitWrite(*states, actualPin, state);
-    }
-
-    //Write
-    shiftOut(dataPin, clockPin, MSBFIRST, *states);
-  }
-
-  //End session
+void onDisplayTwoProgram()
+{
+  byte registerData1 = B00100010;
+  byte registerData2 = B01000100;
+  byte registerData3 = B00000100;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
   digitalWrite(latchPin, HIGH);
+  
+  delay(50);
+  
+  registerData1 = B01010101;
+  registerData2 = B10101010;
+  registerData3 = B00001010;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+  
+  delay(50);
+  
+  registerData1 = B10001000;
+  registerData2 = B00010001;
+  registerData3 = B00010000;
+  digitalWrite(latchPin, LOW);  
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData3);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData2);
+  shiftOut(dataPin, clockPin, LSBFIRST, registerData1);
+  digitalWrite(latchPin, HIGH);
+}
+
+/* Эта функция сдвигает биты влево на одну позицию, перемещая старший бит
+
+на место младшего. Другими словами, она "вращает" биты по кругу.
+Например, 11110000 превращается в 11100001.
+*/
+void rotateLeft(uint8_t &bits)
+{
+  uint8_t high_bit = bits & (1 << 7) ? 1 : 0;
+  bits = (bits << 1) | high_bit;
+}
+void rotateRight(uint8_t &bits)
+{
+  uint8_t low_bit = bits & 1 ? (1 << 7) : 0;
+  bits = (bits >> 1) | low_bit;
+}
+
+void onDisplayFirstProgram()
+{
+  byte startByte = 0b00000001;
+
+  digitalWrite(latchPin, LOW);                        // устанавливаем синхронизацию "защелки" на LOW
+  shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);   // передаем последовательно на dataPin
+  shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
+  shiftOut(dataPin, clockPin, LSBFIRST, startByte<<1);
+  digitalWrite(latchPin, HIGH); 
 }
