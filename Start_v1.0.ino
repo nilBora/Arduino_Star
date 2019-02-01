@@ -20,7 +20,7 @@ void loop()
 {
   switch (4) {
   case 1:
-    onDisplayFirstProgram();
+    onDisplayOneProgram();
     break;
   case 2:
     onDisplayTwoProgram();
@@ -113,56 +113,71 @@ void onDisplayThreeProgram()
   delay(500);
 }
 
+ byte dataStepOne[3]= {
+    B00010000, //третий регистр
+    B00010001, //второй регистр
+    B10001000 //первый регистр
+ };
+
+ byte dataStepTwo[3] = {
+    B00001010, //третий регистр
+    B10101010, //второй регистр
+    B01010101 //первый регистр
+ };
+
+ byte dataStepThree[3] = {
+    B00000100, //третий регистр
+    B01000100, //второй регистр
+    B00100010 //первый регистр
+ };
 void onDisplayFourProgram()
+{
+  byte resultData[3];
+  
+  setRegistersNull();
+  
+  delay(500);
+  
+  setDataInRegisters(dataStepOne);
+
+  delay(500);
+  
+  for (int i=0; i<3; i++) {
+     resultData[i] = dataStepOne[i] | dataStepTwo[i];
+  }
+
+  setDataInRegisters(resultData);
+  
+  delay(500);
+
+  for (int i=0; i<3; i++) {
+     resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
+  }
+
+  setDataInRegisters(resultData);
+  
+  delay(500);
+}
+
+void setDataInRegisters(byte *data)
+{
+  digitalWrite(latchPin, LOW);
+  for (int i=0; i<3; i++) {
+    shiftOut(dataPin, clockPin, MSBFIRST, data[i]);
+  }
+  digitalWrite(latchPin, HIGH);
+
+  return true;
+}
+
+void setRegistersNull()
 {
   digitalWrite(latchPin, LOW);  
   shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
   shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
   shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
   digitalWrite(latchPin, HIGH);
-  delay(500);
-
-  byte dataStepOne[3]= {
-    B00010000,
-    B00010001,
-    B10001000
-  };
-  
-  digitalWrite(latchPin, LOW);
-  for (int i=0; i<3; i++) {
-    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i]);
-  }
-  digitalWrite(latchPin, HIGH);
-
-  delay(500);
-
-  byte dataStepTwo[3] = {
-    B00001010,
-    B10101010,
-    B01010101
-  };
-  digitalWrite(latchPin, LOW);
-  
-  for (int i=0; i<3; i++) {
-    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i] | dataStepTwo[i]);
-  }
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
-
-  byte dataStepThree[3] = {
-    B00000100,
-    B01000100,
-    B00100010
-  };
-  
-  digitalWrite(latchPin, LOW);
-  for (int i=0; i<3; i++) {
-    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i] | dataStepTwo[i] | dataStepThree[i]);
-  }
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
+  return true;
 }
 
 /* Эта функция сдвигает биты влево на одну позицию, перемещая старший бит
@@ -180,13 +195,16 @@ void rotateRight(uint8_t &bits)
   bits = (bits >> 1) | low_bit;
 }
 
-void onDisplayFirstProgram()
+void onDisplayOneProgram()
 {
-  byte startByte = 0b00000001;
+  setRegistersUnits();
+}
 
+void setRegistersUnits()
+{
   digitalWrite(latchPin, LOW);                        // устанавливаем синхронизацию "защелки" на LOW
-  shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);   // передаем последовательно на dataPin
-  shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
-  shiftOut(dataPin, clockPin, LSBFIRST, startByte<<1);
-  digitalWrite(latchPin, HIGH); 
+  shiftOut(dataPin, clockPin, LSBFIRST, 0b11111111);   // передаем последовательно на dataPin
+  shiftOut(dataPin, clockPin, LSBFIRST, 0b11111111);
+  shiftOut(dataPin, clockPin, LSBFIRST, 0b11111111);
+  digitalWrite(latchPin, HIGH);
 }
