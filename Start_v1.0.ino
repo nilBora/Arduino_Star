@@ -115,7 +115,6 @@ void onDisplayThreeProgram()
 
 void onDisplayFourProgram()
 {
-
   digitalWrite(latchPin, LOW);  
   shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
   shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
@@ -123,49 +122,50 @@ void onDisplayFourProgram()
   digitalWrite(latchPin, HIGH);
   delay(500);
 
-  byte registersData[3]= {
-    B10001000,
+  byte dataStepOne[3]= {
+    B00010000,
     B00010001,
-    B00010000
+    B10001000
   };
   
-  byte registerData1 = B10001000;
-  byte registerData2 = B00010001;
-  byte registerData3 = B00010000;
   digitalWrite(latchPin, LOW);
- 
-  shiftOut(dataPin, clockPin, MSBFIRST, registersData[2]);
-  shiftOut(dataPin, clockPin, MSBFIRST, registersData[1]);
-  shiftOut(dataPin, clockPin, MSBFIRST, registersData[0]);
+  for (int i=0; i<3; i++) {
+    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i]);
+  }
   digitalWrite(latchPin, HIGH);
 
   delay(500);
 
-  registerData1 = registerData1 | B01010101;
-  registerData2 = registerData2 | B10101010;
-  registerData3 = registerData3 | B00001010;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  byte dataStepTwo[3] = {
+    B00001010,
+    B10101010,
+    B01010101
+  };
+  digitalWrite(latchPin, LOW);
+  
+  for (int i=0; i<3; i++) {
+    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i] | dataStepTwo[i]);
+  }
   digitalWrite(latchPin, HIGH);
   
   delay(500);
+
+  byte dataStepThree[3] = {
+    B00000100,
+    B01000100,
+    B00100010
+  };
   
-  registerData1 = registerData1| B00100010;
-  registerData2 = registerData2 | B01000100;
-  registerData3 = registerData3 | B00000100;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
+  digitalWrite(latchPin, LOW);
+  for (int i=0; i<3; i++) {
+    shiftOut(dataPin, clockPin, MSBFIRST, dataStepOne[i] | dataStepTwo[i] | dataStepThree[i]);
+  }
   digitalWrite(latchPin, HIGH);
   
   delay(500);
 }
 
 /* Эта функция сдвигает биты влево на одну позицию, перемещая старший бит
-
 на место младшего. Другими словами, она "вращает" биты по кругу.
 Например, 11110000 превращается в 11100001.
 */
