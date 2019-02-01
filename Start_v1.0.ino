@@ -4,16 +4,10 @@ int clockPin = 11; //Пин подключен к SH_CP входу 74HC595
 
 void setup()
 {
-//устанавливаем режим OUTPUT
-pinMode(latchPin, OUTPUT);
-pinMode(clockPin, OUTPUT);
-pinMode(dataPin, OUTPUT);
-
-digitalWrite(latchPin, LOW); // устанавливаем синхронизацию "защелки" на LOW
-shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000); // передаем последовательно на dataPin
-shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-digitalWrite(latchPin, HIGH); //"защелкиваем" регистр, тем самым устанавливая значения на выходах
+  //устанавливаем режим OUTPUT
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
 }
 
 void loop()
@@ -34,102 +28,54 @@ void loop()
   }
 }
 
-void onDisplayTwoProgram()
-{
-  byte registerData1 = B00100010;
-  byte registerData2 = B01000100;
-  byte registerData3 = B00000100;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
-  
-  registerData1 = B01010101;
-  registerData2 = B10101010;
-  registerData3 = B00001010;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
-  
-  registerData1 = B10001000;
-  registerData2 = B00010001;
-  registerData3 = B00010000;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-
-  delay(500);
-}
-
-void onDisplayThreeProgram()
-{
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-  digitalWrite(latchPin, HIGH);
-  delay(500);
-  
-  byte registerData1 = B00100010;
-  byte registerData2 = B01000100;
-  byte registerData3 = B00000100;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
-  
-  registerData1 = registerData1 | B01010101;
-  registerData2 = registerData2 | B10101010;
-  registerData3 = registerData3 | B00001010;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-  
-  delay(500);
-  
-  registerData1 = registerData1 | B10001000;
-  registerData2 = registerData2 | B00010001;
-  registerData3 = registerData3 | B00010000;
-  digitalWrite(latchPin, LOW);  
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData3);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData2);
-  shiftOut(dataPin, clockPin, MSBFIRST, registerData1);
-  digitalWrite(latchPin, HIGH);
-
-  delay(500);
-}
-
- byte dataStepOne[3]= {
+ const byte dataStepOne[3]= {
     B00010000, //третий регистр
     B00010001, //второй регистр
     B10001000 //первый регистр
  };
 
- byte dataStepTwo[3] = {
+ const byte dataStepTwo[3] = {
     B00001010, //третий регистр
     B10101010, //второй регистр
     B01010101 //первый регистр
  };
 
- byte dataStepThree[3] = {
+ const byte dataStepThree[3] = {
     B00000100, //третий регистр
     B01000100, //второй регистр
     B00100010 //первый регистр
  };
+
+void onDisplayTwoProgram()
+{
+  setDataInRegisters(dataStepThree, 500);
+
+  setDataInRegisters(dataStepTwo, 500);
+
+  setDataInRegisters(dataStepOne, 500);
+}
+
+void onDisplayThreeProgram()
+{
+  setRegistersNull();
+  delay(500);
+
+  byte resultData[3];
+  
+  setDataInRegisters(dataStepThree, 500);
+
+  for (int i=0; i<3; i++) {
+     resultData[i] = dataStepThree[i] | dataStepTwo[i];
+  }
+  setDataInRegisters(dataStepTwo, 500);
+
+  for (int i=0; i<3; i++) {
+     resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
+  }
+  setDataInRegisters(dataStepOne, 500);
+}
+
+
 void onDisplayFourProgram()
 {
   byte resultData[3];
@@ -138,35 +84,31 @@ void onDisplayFourProgram()
   
   delay(500);
   
-  setDataInRegisters(dataStepOne);
-
-  delay(500);
+  setDataInRegisters(dataStepOne, 500);
   
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepOne[i] | dataStepTwo[i];
   }
 
-  setDataInRegisters(resultData);
-  
-  delay(500);
+  setDataInRegisters(resultData, 500);
 
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
   }
 
-  setDataInRegisters(resultData);
-  
-  delay(500);
+  setDataInRegisters(resultData, 500);
 }
 
-void setDataInRegisters(byte *data)
+void setDataInRegisters(byte *data, int delayCmd)
 {
   digitalWrite(latchPin, LOW);
   for (int i=0; i<3; i++) {
     shiftOut(dataPin, clockPin, MSBFIRST, data[i]);
   }
   digitalWrite(latchPin, HIGH);
-
+  
+  delay(delayCmd);
+  
   return true;
 }
 
