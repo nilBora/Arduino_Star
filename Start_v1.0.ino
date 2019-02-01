@@ -2,6 +2,9 @@ int dataPin = 9; //Пин подключен к DS входу 74HC595
 int latchPin = 10; //Пин подключен к ST_CP входу 74HC595
 int clockPin = 11; //Пин подключен к SH_CP входу 74HC595
 
+unsigned long delay1 = 0;
+unsigned long delay2 = 0;
+unsigned long delay3 = 0;
 void setup()
 {
   //устанавливаем режим OUTPUT
@@ -13,19 +16,19 @@ void setup()
 void loop()
 {
   switch (4) {
-  case 1:
-    onDisplayOneProgram();
-    break;
-  case 2:
-    onDisplayTwoProgram();
-    break;
-   case 3:
-    onDisplayThreeProgram();
-    break;
-   case 4:
-    onDisplayFourProgram();
-    break;
-  }
+    case 1:
+      onDisplayOneProgram();
+      break;
+    case 2:
+      onDisplayTwoProgram();
+      break;
+     case 3:
+      onDisplayThreeProgram();
+      break;
+     case 4:
+      onDisplayFourProgram();
+      break;
+    }
 }
 
  const byte dataStepOne[3]= {
@@ -48,11 +51,11 @@ void loop()
 
 void onDisplayTwoProgram()
 {
-  setDataInRegisters(dataStepThree, 500);
+  setDataInRegisters(dataStepThree, delay1, 500);
 
-  setDataInRegisters(dataStepTwo, 500);
+  setDataInRegisters(dataStepTwo, delay2, 500);
 
-  setDataInRegisters(dataStepOne, 500);
+  setDataInRegisters(dataStepOne, delay3, 500);
 }
 
 void onDisplayThreeProgram()
@@ -62,17 +65,17 @@ void onDisplayThreeProgram()
 
   byte resultData[3];
   
-  setDataInRegisters(dataStepThree, 500);
+  setDataInRegisters(dataStepThree, delay1, 500);
 
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepThree[i] | dataStepTwo[i];
   }
-  setDataInRegisters(dataStepTwo, 500);
+  setDataInRegisters(dataStepTwo, delay2, 500);
 
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
   }
-  setDataInRegisters(dataStepOne, 500);
+  setDataInRegisters(dataStepOne, delay3, 500);
 }
 
 
@@ -84,30 +87,33 @@ void onDisplayFourProgram()
   
   delay(500);
   
-  setDataInRegisters(dataStepOne, 500);
+  setDataInRegisters(dataStepOne, delay1, 500);
   
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepOne[i] | dataStepTwo[i];
   }
 
-  setDataInRegisters(resultData, 500);
+  setDataInRegisters(resultData, delay2, 500);
 
   for (int i=0; i<3; i++) {
      resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
   }
 
-  setDataInRegisters(resultData, 500);
+  setDataInRegisters(resultData, delay3, 500);
 }
 
-void setDataInRegisters(byte *data, int delayCmd)
+void setDataInRegisters(byte *data, unsigned long timing, int delayCmd)
 {
-  digitalWrite(latchPin, LOW);
-  for (int i=0; i<3; i++) {
-    shiftOut(dataPin, clockPin, MSBFIRST, data[i]);
-  }
-  digitalWrite(latchPin, HIGH);
+  if (millis() - timing > delayCmd){ 
+    timing = millis();
+    digitalWrite(latchPin, LOW);
+    for (int i=0; i<3; i++) {
+      shiftOut(dataPin, clockPin, MSBFIRST, data[i]);
+    }
+    digitalWrite(latchPin, HIGH);
+ }
   
-  delay(delayCmd);
+  //delay(delayCmd);
   
   return true;
 }
@@ -136,6 +142,7 @@ void rotateRight(uint8_t &bits)
   uint8_t low_bit = bits & 1 ? (1 << 7) : 0;
   bits = (bits >> 1) | low_bit;
 }
+int previousMillis = 0;
 
 void onDisplayOneProgram()
 {
