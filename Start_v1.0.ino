@@ -11,6 +11,10 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
+
+  delay1 = millis()+500;
+  delay2 = millis()+1000;
+  delay3 = millis()+1500;
 }
 
 void loop()
@@ -86,32 +90,44 @@ void onDisplayFourProgram()
   setRegistersNull();
   
   delay(500);
+  int now_time = millis();
+
+  if (now_time >= delay1) {
+    delay1 = now_time+500;
+    setDataInRegisters(dataStepOne, delay1, 500);
+  }
   
-  setDataInRegisters(dataStepOne, delay1, 500);
+  now_time = millis();
+  if (now_time >= delay2) {
+    delay2 = now_time+1000;
+    for (int i=0; i<3; i++) {
+       resultData[i] = dataStepOne[i] | dataStepTwo[i];
+    }
   
-  for (int i=0; i<3; i++) {
-     resultData[i] = dataStepOne[i] | dataStepTwo[i];
+    setDataInRegisters(resultData, delay2, 500);
   }
 
-  setDataInRegisters(resultData, delay2, 500);
-
-  for (int i=0; i<3; i++) {
-     resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
+  now_time = millis();
+  if (now_time >= delay3) {
+    delay3 = now_time+1500;
+    for (int i=0; i<3; i++) {
+       resultData[i] = dataStepOne[i] | dataStepTwo[i] | dataStepThree[i];
+    }
+  
+    setDataInRegisters(resultData, delay3, 500);
   }
-
-  setDataInRegisters(resultData, delay3, 500);
 }
 
 void setDataInRegisters(byte *data, unsigned long timing, int delayCmd)
 {
-  if (millis() - timing > delayCmd){ 
+  //if (millis() - timing > delayCmd){ 
     timing = millis();
     digitalWrite(latchPin, LOW);
     for (int i=0; i<3; i++) {
       shiftOut(dataPin, clockPin, MSBFIRST, data[i]);
     }
     digitalWrite(latchPin, HIGH);
- }
+  //}
   
   //delay(delayCmd);
   
