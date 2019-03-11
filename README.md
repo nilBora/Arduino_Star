@@ -20,4 +20,8 @@ ST_CP
 ```
 
 ## Electronic circuit
-![Scheme](docs/star.jpg)
+### Top
+![Scheme Top](docs/star-top.jpg)
+
+### Bottom
+![Scheme  Bottom](docs/star-bottom.jpg)
