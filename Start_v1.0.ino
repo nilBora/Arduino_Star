@@ -15,15 +15,9 @@ StarMode mode = StarMode();
 
 void setup()
 {
-  Serial.begin(9600);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  
   mode.setPins();
-  //устанавливаем режим OUTPUT
-
 }
-
-
 
 void loop()
 {
@@ -32,7 +26,7 @@ void loop()
     prevMillisCount = currentMillis;
     doButtonCount();
   }
-  //Serial.println(count);
+  
   switch (count) {
     case 1:
       onDisplayOneProgram();
